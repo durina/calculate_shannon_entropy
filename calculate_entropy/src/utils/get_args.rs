@@ -38,7 +38,7 @@ fn validate_percent(input_str: &str) -> Result<f64, String> {
         .parse()
         .unwrap_or(0.8f64);
     if PERCENTAGE.contains(&percent) {
-        Ok(percent as f64)
+        Ok(percent)
     } else {
         Err(
             format!("Threshold not in the range {} - {}",PERCENTAGE.start(), PERCENTAGE.end())

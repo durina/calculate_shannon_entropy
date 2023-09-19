@@ -9,7 +9,7 @@
 */
 
 
-use std::io::{self, Seek, BufRead, BufReader};
+use std::io::{Seek, BufRead, BufReader};
 use std::fs::File;
 use std::path::PathBuf;
 use log::{debug, error, warn, info};
@@ -27,7 +27,7 @@ pub fn check_fasta(infile: &PathBuf) -> bool {
                             return false;
         }
     };
-    let mut read_alignment_file = io::BufReader::new(&alignment_file);
+    let mut read_alignment_file = BufReader::new(&alignment_file);
     let mut prev_alignment_length = 0u64;
     let mut first_seq_line_pos = 0u64;
     let mut store_position = false;
@@ -71,18 +71,18 @@ pub fn check_fasta(infile: &PathBuf) -> bool {
 }
 
 fn check_alignment_length(buffer: &mut BufReader<&File>, header_flag: &bool, pos_store_flag: &bool, seq_start_pos: &u64, prev_align_len: &mut u64) -> bool {
-    if *header_flag && !pos_store_flag && seq_start_pos > &0 {
+    if *header_flag && !*pos_store_flag && seq_start_pos > &0 {
         let current_alignment_length = buffer.stream_position().unwrap() - seq_start_pos;
         if *prev_align_len > 0u64 && &current_alignment_length != prev_align_len {
             error!("Sequence alignment length does not match previous alignment length!");
-            return false;
+            false
         } else {
             *prev_align_len = current_alignment_length;
             debug!("Current_alignment_length == prev_align_len == {}", current_alignment_length);
-            return true
+            true
         }
     } else {
         warn!("Situation unmanaged");
-        return true;
+        true
     }
 }

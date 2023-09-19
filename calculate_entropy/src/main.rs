@@ -1,7 +1,7 @@
 /*
 Calculate shannon entropy at each position for a given sequence alignment
     + check if all the alignments are of equal length
-    + count the occurence of each character by position
+    + count the occurrence of each character by position
         + handle characters
         + calculate % of ATCG in a column
             + report entropy only if the column > x% ATGC

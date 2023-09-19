@@ -5,12 +5,13 @@
         maintain counts of the character at every position
     
     If Mode::Standard
-        Calculate the occurence of A, T, G, C, -, and others
+        Calculate the occurrence of A, T, G, C, -, and others
     Else if Mode::All
-        Calculate the occurence of all characters
+        Calculate the occurrence of all characters
 */
 
-use std::{collections::HashMap, path::PathBuf, fs::File, io::{self, BufRead, BufReader, Seek, SeekFrom, BufWriter, Write}, sync::{Mutex, Arc}};
+use std::{collections::HashMap, path::PathBuf, fs::File};
+use std::{io::{BufRead, BufReader, Seek, SeekFrom, BufWriter, Write}, sync::{Mutex, Arc}};
 use super::get_args::Mode;
 use threadpool::ThreadPool;
 use log::{debug, error, warn, info};
@@ -20,19 +21,28 @@ const ALL_DNA_NOTATIONS: &str = "ATGCUWSMKRYBDHVN";
 const DNA_ALIGNMENT_NOTATIONS: &str = "-.";
 
 pub fn report_entropy(file: &PathBuf, mode: Mode, threshold: f64, nproc: usize, suffix: &String) {
+    // open validated alignment file from main()
     let alignment_file = File::open(&file).unwrap();
-    let mut read_alignment_file = io::BufReader::new(&alignment_file);
+    // establish file buffer to read contents of the alignment
+    let mut read_alignment_file = BufReader::new(&alignment_file);
     debug!("Opened the file buffer");
-    let count_vec: Vec<HashMap<char, u32>> = initialise_structs(&file, &mode, &mut read_alignment_file);
+    // initialise the HashMap of DNA notatations for every position of the alignment
+    let count_vec: Vec<HashMap<char, u32>> = initialise_structs(&file, &mode,
+                                                                &mut read_alignment_file);
     info!("Positions initialised");
     read_alignment_file.seek(SeekFrom::Start(0)).unwrap();
     debug!("Reset file buffer position to start");
-    process_genomes(count_vec, threshold, mode, nproc, &mut read_alignment_file, suffix, &file);
+    process_genomes(count_vec, threshold, mode, nproc,
+                    &mut read_alignment_file, suffix, &file);
 }
 
-// Initialise the each position in the aligment
+// Initialise the each position in the alignment
 
-fn initialise_structs(file: &PathBuf, mode: &Mode, buffer: &mut BufReader<&File>) -> Vec<HashMap<char, u32>> {
+fn initialise_structs(file: &PathBuf, mode: &Mode, buffer: &mut BufReader<&File>)
+                                                                    -> Vec<HashMap<char, u32>> {
+    // reading into the first genome
+    // estimate length of the alignment
+    // initialise Vec of HashMaps
     debug!("Preparing the columns for analysis");
     let mut line = String::new();
     let mut temp_genome = String::new();
@@ -40,6 +50,11 @@ fn initialise_structs(file: &PathBuf, mode: &Mode, buffer: &mut BufReader<&File>
     let mut flag: bool = false;
     // get one sample genome sequence
     info!("Assessing length of alignments in {:?}", file);
+    // read the sequence from file buffer
+    // Assumptions:
+    // The alignment starts with the header of a particular sequence denoted by ">"
+    // The sequence follows the header on the following lines
+    // The next sequence is either interrupted by a newline or the next header
     while buffer.read_line(&mut line).unwrap_or(0) > 1 {
         if line.starts_with('\n') {
             flag = true
@@ -57,24 +72,29 @@ fn initialise_structs(file: &PathBuf, mode: &Mode, buffer: &mut BufReader<&File>
         }
         line.clear()
     }
+    // crosscheck estimate of length of genome
     if temp_genome.len() != temp_genome_length {
         error!("Check the discrepancy in the length estimated from \
-                genome and character count {} {} respectively", temp_genome.len(), temp_genome_length);
+                genome and character count {} {} respectively", temp_genome.len(),
+                                                                temp_genome_length);
     } else {
         info!("Length of every genome in this alignment \
                 is {}, and the values agree", temp_genome_length);
     }
     // assign alphabets to be considered
-    let alphabets: String = if mode == &Mode::All {
-        format!("{}{}" , ALL_DNA_NOTATIONS, DNA_ALIGNMENT_NOTATIONS)
-    } else {
-        format!("{}{}" , STANDARD_DNA_NOTATIONS, DNA_ALIGNMENT_NOTATIONS)
+    let alphabets: String = match mode {
+        Mode::All => format!("{}{}" , ALL_DNA_NOTATIONS, DNA_ALIGNMENT_NOTATIONS),
+        Mode::Standard => format!("{}{}" , STANDARD_DNA_NOTATIONS, DNA_ALIGNMENT_NOTATIONS)
     };
     // initialise the structs
-    info!("Initialising hasmap with {} each with 0", alphabets);
+    info!("Initialising hashmap with {} each with 0", alphabets);
     let hashmap_init_vals = alphabets.chars().map(|n| (n, 0u32));
     let count_vec = (0..temp_genome.len())
-                                            .map(|_: usize| HashMap::from_iter(hashmap_init_vals.clone()))
+                                            .map(|_: usize|
+                                                    HashMap::from_iter(
+                                                        hashmap_init_vals.clone()
+                                                    )
+                                            )
                                             .collect::<Vec<HashMap<char, u32>>>();
     count_vec
 }

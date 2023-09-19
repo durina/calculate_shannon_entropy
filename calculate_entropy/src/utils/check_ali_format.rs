@@ -19,11 +19,11 @@ pub fn check_fasta(infile: &PathBuf) -> bool {
     // lines after empty lines start with ">"
     let alignment_file =  match File::open(infile) {
         Ok(file) => {  
-                            info!("File openned successfully - {:?}", infile);
+                            info!("File opened successfully - {:?}", infile);
                             file
                         },
         Err(x) => {
-                            error!("Fille {:?} could not be openned - {}", infile, x);
+                            error!("File {:?} could not be openned - {}", infile, x);
                             return false;
         }
     };

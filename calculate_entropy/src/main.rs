@@ -29,6 +29,7 @@ use utils::check_ali_format::check_fasta;
 use utils::calculate_entropy::report_entropy;
 use log::{debug, error, info};
 use env_logger;
+use utils::struct_helper::FileBufferHelper;
 
 fn main() {
     // Path to alignment file 
@@ -39,9 +40,10 @@ fn main() {
     debug!("Parsing commandline arguments");
     for file in cli.input_alignment {
         debug!("Processing file: {:?}", file);
-        if check_fasta(&file) {
+        if check_fasta(&alignment_file) {
+            let mut alignment_file = FileBufferHelper::new(&file);
             info!("Alignment complies requirements {:?}", file);
-            report_entropy(&file, cli.mode, cli.threshold, cli.nproc, &cli.output_suffix);
+            report_entropy(mut alignment_file, cli.mode, cli.threshold, cli.nproc, &cli.output_suffix);
         } else {
             error!("Alignment failed");
         }

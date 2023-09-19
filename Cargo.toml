@@ -1,0 +1,6 @@
+[workspace]
+
+members = [
+	"calculate_entropy",
+	"check_alignment",
+]

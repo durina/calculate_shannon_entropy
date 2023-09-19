@@ -40,10 +40,10 @@ fn main() {
     debug!("Parsing commandline arguments");
     for file in cli.input_alignment {
         debug!("Processing file: {:?}", file);
-        if check_fasta(&alignment_file) {
+        if check_fasta(&file) {
             let mut alignment_file = FileBufferHelper::new(&file);
             info!("Alignment complies requirements {:?}", file);
-            report_entropy(mut alignment_file, cli.mode, cli.threshold, cli.nproc, &cli.output_suffix);
+            report_entropy(&mut alignment_file, cli.mode, cli.threshold, cli.nproc, &cli.output_suffix);
         } else {
             error!("Alignment failed");
         }

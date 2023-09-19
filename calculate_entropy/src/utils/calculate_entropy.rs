@@ -67,7 +67,7 @@ fn initialise_structs(file: &mut FileBufferHelper, mode: &Mode) -> Vec<HashMap<c
             file.line.clear();
             break
         } else if file.line.starts_with('>') {
-            debug!("{}", line.trim());
+            debug!("{}", file.line.trim());
             flag = true;
         } else {
             temp_genome_length += file.line.trim().len();
@@ -118,7 +118,7 @@ fn process_genomes(count_vec: Vec<HashMap<char, u32>>, threshold: f64,
     // analyse all genomes
     while file.buffer_reader.read_line(&mut file.line).unwrap_or(0) > 1 {
         if file.line.starts_with('>') {
-            debug!("Analysing {}", line);
+            debug!("Analysing {}", file.line);
             if header.is_empty() && temp_genome.is_empty() {
                 header =  file.line.trim().to_string();
             } else if !temp_genome.is_empty() {

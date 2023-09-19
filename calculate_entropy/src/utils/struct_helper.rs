@@ -6,20 +6,19 @@ use std::fs::File;
 use std::io::BufReader;
 use std::path::PathBuf;
 
-pub struct FileBufferHelper<'a>{
+pub struct FileBufferHelper<'a> {
     pub(crate) path: &'a PathBuf,
-    pub buffer_reader: BufReader<&'a File>,
+    pub buffer_reader: BufReader<File>,
     pub line: String
 }
 
-impl FileBufferHelper {
-    pub fn new(file: &PathBuf) -> FileBufferHelper {
+impl<'a> FileBufferHelper<'a> {
+    pub fn new(file: &'a PathBuf) -> FileBufferHelper {
         let mut line = String::new();
-        let file_open = File::open(&file).unwrap();
-        let mut read_file = BufReader::new(&file_open);
+        let file_open = File::open(file.clone()).unwrap();
         Self {
             path: &file,
-            buffer_reader: read_file,
+            buffer_reader: BufReader::new(file_open),
             line,
         }
     }

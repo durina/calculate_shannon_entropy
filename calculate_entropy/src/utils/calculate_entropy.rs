@@ -10,8 +10,8 @@
         Calculate the occurrence of all characters
 */
 
-use std::{collections::HashMap, path::PathBuf, fs::File};
-use std::{io::{BufRead, BufReader, Seek, SeekFrom, BufWriter, Write}, sync::{Mutex, Arc}};
+use std::{collections::HashMap, fs::File};
+use std::{io::{BufRead, Seek, SeekFrom, BufWriter, Write}, sync::{Mutex, Arc}};
 use super::get_args::Mode;
 use threadpool::ThreadPool;
 use log::{debug, error, warn, info};

@@ -5,7 +5,6 @@
 use std::fs::File;
 use std::io::BufReader;
 use std::path::PathBuf;
-use log::{error, info};
 
 pub struct FileBufferHelper<'a>{
     pub(crate) path: &'a PathBuf,

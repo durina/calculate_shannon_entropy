@@ -4,6 +4,7 @@
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/calculate_entropy/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/check_alignment/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/calculate_entropy/lib/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
       <excludeFolder url="file://$MODULE_DIR$/calculate_entropy/target" />
     </content>

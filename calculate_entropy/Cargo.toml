@@ -10,3 +10,8 @@ clap = {version = "4.2.7", features = ["derive"]}
 threadpool = "1.0"
 log = "0.4.17"
 env_logger = "0.10.0"
+check_fasta = { path = "lib" }
+
+[[bin]]
+name = "calculate_entropy"
+path = "bin/src/main.rs"

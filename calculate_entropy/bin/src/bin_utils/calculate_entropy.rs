@@ -15,7 +15,7 @@ use std::{io::{BufRead, Seek, SeekFrom, BufWriter, Write}, sync::{Mutex, Arc}};
 use super::get_args::Mode;
 use threadpool::ThreadPool;
 use log::{debug, error, warn, info};
-use crate::utils::struct_helper::FileBufferHelper;
+use check_fasta::lib_utils::struct_helper::FileBufferHelper;
 
 const STANDARD_DNA_NOTATIONS: &str = "ATGC";
 const ALL_DNA_NOTATIONS: &str = "ATGCUWSMKRYBDHVN";

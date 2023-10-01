@@ -7,7 +7,7 @@ use std::path::PathBuf;
 pub struct Cli {
     /// Path to Alignment file stored in fasta format
     #[arg(short='i', long="infile", required = true, action=clap::ArgAction::Append)]
-    pub input_alignment: Vec<PathBuf>, 
+    pub input_alignment: Vec<PathBuf>,
     /// Keep tab of 'All' allowed DNA notations or only allow the 'Standard' ATGC. Recommended: 'Standard'
     #[arg(short='m', long="mode", value_enum, required = true)]
     pub mode: Mode,

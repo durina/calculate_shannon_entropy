@@ -5,16 +5,18 @@
 use std::fs::File;
 use std::io::BufReader;
 use std::path::PathBuf;
+use log::debug;
 
 pub struct FileBufferHelper<'a> {
-    pub(crate) path: &'a PathBuf,
+    pub path: &'a PathBuf,
     pub buffer_reader: BufReader<File>,
     pub line: String
 }
 
 impl<'a> FileBufferHelper<'a> {
     pub fn new(file: &'a PathBuf) -> FileBufferHelper {
-        let mut line = String::new();
+        let line = String::new();
+        debug!("FileHelper created for: {:?}", file);
         let file_open = File::open(file.clone()).unwrap();
         Self {
             path: &file,

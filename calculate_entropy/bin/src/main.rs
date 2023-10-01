@@ -21,16 +21,15 @@ Arguments
     get path to alignment file
     flag to include other alphabets
 */
+mod bin_utils;
 
-mod utils;
 use clap::Parser;
-use utils::get_args::Cli;
-use utils::check_ali_format::check_fasta;
-use utils::calculate_entropy::report_entropy;
-use log::{debug, error, info};
-use env_logger;
-use utils::struct_helper::FileBufferHelper;
+use bin_utils::get_args::Cli;
 
+use check_fasta::check_fasta;
+use bin_utils::calculate_entropy::report_entropy;
+use log::{debug, info};
+use env_logger;
 fn main() {
     // Path to alignment file 
     // Mode of operation
@@ -40,12 +39,12 @@ fn main() {
     debug!("Parsing commandline arguments");
     for file in cli.input_alignment {
         debug!("Processing file: {:?}", file);
-        if check_fasta(&file) {
-            let mut alignment_file = FileBufferHelper::new(&file);
-            info!("Alignment complies requirements {:?}", file);
-            report_entropy(&mut alignment_file, cli.mode, cli.threshold, cli.nproc, &cli.output_suffix);
-        } else {
-            error!("Alignment failed");
+        match check_fasta(&file, true) {
+            Ok(mut alignment_file) => {
+                info!("Alignment complies requirements {:?}", file);
+                report_entropy(&mut alignment_file, cli.mode, cli.threshold, cli.nproc, &cli.output_suffix);
+            },
+            Err(e) => eprintln!("{}", e)
         }
     }
 }

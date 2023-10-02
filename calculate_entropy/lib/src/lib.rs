@@ -17,6 +17,7 @@ pub mod lib_utils;
 use lib_utils::struct_helper::FileBufferHelper;
 
 const IUPAC_DNA_ALIGNMENT: &str = "ATGCUWSMKRYBDHVN-.";
+const IUPAC_DNA_ALIGNMENT_LOWER: &str = "atgcuwsmkrybdhvn";
 pub fn check_fasta(infile: &PathBuf, length_check: bool) -> Result<FileBufferHelper, &'static str> {
     // check if the first line is ">", except empty space
     // lines after empty lines start with ">"
@@ -76,7 +77,7 @@ pub fn check_fasta(infile: &PathBuf, length_check: bool) -> Result<FileBufferHel
                 first_seq_line_pos = alignment_file.buffer_reader.stream_position()
                         .expect("Unable to retrieve buffer position");
             },
-            x if IUPAC_DNA_ALIGNMENT.contains(x) => {
+            x if IUPAC_DNA_ALIGNMENT.contains(x) || IUPAC_DNA_ALIGNMENT_LOWER.contains(x) => {
                 // if the the line starts with any of the IUPAC DNA characters
                 if !found_header && !store_position {
                     // if the sequences are found before the corresponding header

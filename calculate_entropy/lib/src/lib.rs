@@ -64,10 +64,10 @@ pub fn check_fasta(infile: &PathBuf, length_check: bool) -> Result<FileBufferHel
                 } else if found_header {
                     // if header is encountered right after a header
                     // throw error
-                    error!("No sequence encountered in between headers. Empty sequence encountered.\\
-                    Remove headers without any sequence and try again.");
-                    return Err("No sequence encountered in between headers. Empty sequence encountered.\\
-                    Remove headers without any sequence and try again.")
+                    error!("No sequence encountered in between headers. Empty \
+                    sequence encountered. Remove headers without any sequence and try again.");
+                    return Err("No sequence encountered in between headers. Empty sequence \
+                    encountered. Remove headers without any sequence and try again.")
                 }
                 header_info = alignment_file.line.trim().to_string();
                 trace!("Processing {}", header_info);
@@ -77,7 +77,8 @@ pub fn check_fasta(infile: &PathBuf, length_check: bool) -> Result<FileBufferHel
                 first_seq_line_pos = alignment_file.buffer_reader.stream_position()
                         .expect("Unable to retrieve buffer position");
             },
-            x if IUPAC_DNA_ALIGNMENT.contains(x) || IUPAC_DNA_ALIGNMENT_LOWER.contains(x) => {
+            x if IUPAC_DNA_ALIGNMENT.contains(x) ||
+                IUPAC_DNA_ALIGNMENT_LOWER.contains(x) => {
                 // if the the line starts with any of the IUPAC DNA characters
                 if !found_header && !store_position {
                     // if the sequences are found before the corresponding header
@@ -107,35 +108,30 @@ pub fn check_fasta(infile: &PathBuf, length_check: bool) -> Result<FileBufferHel
                 } else if found_header && store_position {
                     // found_header and store_position should be mutually exclusive
                     // if both are true, throw error
-                    error!("Unexplained situation. Both store_position and header are true.\\
+                    error!("Unexplained situation. Both store_position and header are true.\
                     Possibly interrupted by newline or unidentified character.");
-                    return Err("Unexplained situation. Both store_position and header are true.\\
+                    return Err("Unexplained situation. Both store_position and header are true.\
                     Possibly interrupted by newline or unidentified character.")
                 }
             },
-            "\n" => {
+            &_ => {
                 // if the headers or sequences are interrupted by newline
                 // throw error if newlines are found in between
                 //  consecutive headers
                 //  consecutive lines of sequences
                 if found_header {
-                    error!("Header interrupted by newline before encountering sequence");
-                    return Err("Header interrupted by newline before encountering sequence")
+                    error!("Header interrupted by non-IUPAC character \
+                                before encountering sequence");
+                    return Err("Header interrupted by non-IUPAC character \
+                                    before encountering sequence")
                 } else if !found_header && store_position {
                     // two possibilities
                     //  interruption is after the end of sequence
                     //  interruption is in between the sequences
                     interruption = true;
+                    warn!("Non-IUPAC character encountered: {}", alignment_file.line.trim());
                 }
             },
-            &_ => {
-                // if the line starts with a character that is not ">",
-                // IUPAC_DNA_characters or empty
-                // throw error
-                interruption = true;
-                warn!("Unexpected scenarios encountered {}", alignment_file.line);
-                // Err(format!("Unexpected scenarios encountered {}", alignment_file.line))
-            }
         }
     alignment_file.line.clear();
     }

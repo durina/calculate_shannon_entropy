@@ -23,7 +23,7 @@ const ALL_DNA_NOTATIONS_UPPER: &str = "ATGCUWSMKRYBDHVN";
 const ALL_DNA_NOTATIONS_LOWER: &str = "atgcuwsmkrybdhvn";
 const DNA_ALIGNMENT_NOTATIONS: &str = "-.";
 
-pub fn report_entropy(file: &mut FileBufferHelper, cli: Cli) {
+pub fn report_entropy(file: &mut FileBufferHelper, cli: &Cli) {
     // open validated alignment file from main()
     // initialise the HashMap of DNA notatations for every position of the alignment
     let count_vec: Vec<HashMap<char, f64>> = initialise_structs(file, &cli.mode);
@@ -100,7 +100,7 @@ fn initialise_structs(file: &mut FileBufferHelper, mode: &Mode) -> Vec<HashMap<c
 
 // Tabulate the frequency of each notation at the given position
 fn process_genomes(count_vec: Vec<HashMap<char, f64>>, file: &mut FileBufferHelper,
-                   cli: Cli) {
+                   cli: &Cli) {
     let mut genome = String::new();
     let mut header = String::new();
     let arc_count_vec: Arc<Mutex<Vec<HashMap<char, f64>>>> = Arc::new(
@@ -168,7 +168,7 @@ fn update_counts(column: &mut HashMap<char, f64>, letter: &char, position: &usiz
 
 // arrive at Shannon entropy at each position
 fn finalise_counts(map_vec: Vec<HashMap<char, f64>>, genome_count: f64,
-                   cli:Cli, file: &mut FileBufferHelper) {
+                   cli: &Cli, file: &mut FileBufferHelper) {
     // calculate the shannon entropy at every position
     // shannon entropy = sum(-p log_2 p)
     let atgc: &str = if cli.mode == Mode::Standard {

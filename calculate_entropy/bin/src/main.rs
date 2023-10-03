@@ -35,12 +35,12 @@ fn main() {
     env_logger::init();
     let cli = Cli::parse();
     // debug!("Parsing commandline arguments");
-    for file in cli.input_alignment {
+    for file in &cli.input_alignment {
         debug!("Processing file: {:?}", file);
         match check_fasta(&file, true) {
             Ok(mut alignment_file) => {
                 info!("Alignment complies requirements {:?}", file);
-                report_entropy(&mut alignment_file, cli);
+                report_entropy(&mut alignment_file, &cli);
             },
             Err(e) => eprintln!("{}", e)
         }

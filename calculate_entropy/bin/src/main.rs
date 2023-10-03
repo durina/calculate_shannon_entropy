@@ -22,10 +22,8 @@ Arguments
     flag to include other alphabets
 */
 mod bin_utils;
-
 use clap::Parser;
 use bin_utils::get_args::Cli;
-
 use check_fasta::check_fasta;
 use bin_utils::calculate_entropy::report_entropy;
 use log::{debug, info};
@@ -36,13 +34,13 @@ fn main() {
     // Characters to ignore
     env_logger::init();
     let cli = Cli::parse();
-    debug!("Parsing commandline arguments");
+    // debug!("Parsing commandline arguments");
     for file in cli.input_alignment {
         debug!("Processing file: {:?}", file);
         match check_fasta(&file, true) {
             Ok(mut alignment_file) => {
                 info!("Alignment complies requirements {:?}", file);
-                report_entropy(&mut alignment_file, cli.mode, cli.threshold, cli.nproc, &cli.output_suffix);
+                report_entropy(&mut alignment_file, cli);
             },
             Err(e) => eprintln!("{}", e)
         }

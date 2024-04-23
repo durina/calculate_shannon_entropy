@@ -30,5 +30,6 @@ impl<'a> FileBufferHelper<'a> {
         // reset buffer to position 0
         // file.buffer_reader.seek(SeekFrom::Start(0)).unwrap();
         self.buffer_reader.seek(SeekFrom::Start(0)).expect("Unable to reset buffer");
+        self.line.clear();
     }
 }

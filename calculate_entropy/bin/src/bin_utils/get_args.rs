@@ -15,7 +15,7 @@ pub struct Cli {
     #[arg(short='t', long="threshold", value_parser=validate_percent, default_value_t=0.8)]
     pub threshold: f64,
     /// Suffix to be appended to the filename when storing the file. Default: "shannon_entropy_output.csv"
-    #[arg(short='s', long="output-suffix", default_value_t=String::from("_output"))]
+    #[arg(short='s', long="output-suffix", default_value_t=String::from("shannon_entropy_output"))]
     pub output_suffix: String,
     /// Specify delimiter to separate position and entropy. Defalt: ","
     #[arg(short='d', long="delimiter", default_value_t=',')]

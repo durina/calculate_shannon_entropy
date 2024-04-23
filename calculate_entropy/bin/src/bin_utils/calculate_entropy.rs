@@ -14,7 +14,7 @@ use std::{collections::HashMap, fs::File};
 use std::{io::{BufRead, BufWriter, Write}, sync::{Mutex, Arc}};
 use super::get_args::Mode;
 use threadpool::ThreadPool;
-use log::{debug, error, warn, info};
+use log::{debug, error, warn, info, trace};
 use check_fasta::lib_utils::struct_helper::FileBufferHelper;
 use crate::bin_utils::get_args::Cli;
 
@@ -60,15 +60,18 @@ fn initialise_structs(file: &mut FileBufferHelper, mode: &Mode) -> Vec<HashMap<c
     // The next sequence is either interrupted by a newline or the next header
     file.buffer_reset();
     while file.buffer_reader.read_line(&mut file.line).unwrap_or(0) >= 1 {
+        info!("{}", file.line.trim());
         if &file.line[..1] == ">" && temp_genome_length == 0 {
-            continue
+            info!("Header: {}", file.line.trim());
         } else if ALL_DNA_NOTATIONS_UPPER.contains(&file.line[..1]) ||
             DNA_ALIGNMENT_NOTATIONS.contains(&file.line[..1]) ||
             ALL_DNA_NOTATIONS_LOWER.contains(&file.line[..1]) {
+            info!("Lenght of temp genome is : {}", temp_genome_length);
             temp_genome_length += file.line.trim().len();
             temp_genome += file.line.trim();
         } else if &file.line[..1] == ">" && temp_genome_length != 0 {
             info!("While loop breaking");
+            file.line.clear();
             break
         }
         file.line.clear()
@@ -111,11 +114,11 @@ fn process_genomes(count_vec: Vec<HashMap<char, f64>>, file: &mut FileBufferHelp
     // analyse all genomes
     while file.buffer_reader.read_line(&mut file.line).unwrap_or(0) >= 1 {
         if file.line.starts_with('>') {
-            debug!("Analysing {}", file.line);
+            trace!("Analysing {}", file.line);
             if header.is_empty() && genome.is_empty() {
                 header =  file.line.trim().to_string();
             } else if !genome.is_empty() {
-                debug!("Processing {}", header);
+                trace!("Processing {}", header);
                 let arc_clone = Arc::clone(&arc_count_vec);
                 let temp_genome = genome.drain(..).collect();
                 let temp_header = header.drain(..).collect();
@@ -190,7 +193,8 @@ fn finalise_counts(map_vec: Vec<HashMap<char, f64>>, genome_count: f64,
     // character present in a given position
     let count_headers = atgc.chars()
                                     .fold(String::new(), |final_str, x|
-                                                        final_str + "\tCount_" + &x.to_string());
+                                                        final_str + &cli.delimiter.to_string() +
+                                                            "Count_" + &x.to_string());
     // Headers of final output file
     let headers = format!("Position\
                         {count_headers}{delim}\
@@ -212,25 +216,32 @@ fn finalise_counts(map_vec: Vec<HashMap<char, f64>>, genome_count: f64,
                             .collect();
             let atgc_share: f64 = atgc_count_vec.iter().sum();
             let atgc_fraction: f64 = atgc_share/genome_count_f64;
-            let entropy: f64 = get_entropy(&atgc_count_vec, &genome_count_f64);
+            let entropy: f64 = get_entropy(&atgc_count_vec);
             let n_counts = atgc_count_vec.drain(..)
-                                        .map(|x| format!("{x}\t")).collect::<String>();
+                                        .map(|x| format!("{}{x}", cli.delimiter))
+                                        .collect::<String>();
             let validity = if atgc_fraction >= cli.threshold {
                 format!("Valid. Threshold = {}", cli.threshold)
             } else {
                 format!("Invalid. Threshold = {}", cli.threshold)
             };
-            writeln!(entropy_writer, "{pos}\t{counts}{genome_count}\t{atgc_share}\t\
-                                        {atgc_fraction}\t{shannon}\t{validity}",
-                     pos=idx+1, counts=n_counts,shannon=entropy).unwrap();
+            writeln!(entropy_writer, "{pos}{counts}{delim}{genome_count}{delim}{atgc_share}{delim}\
+                                        {atgc_fraction}{delim}{shannon}{delim}{validity}",
+                     pos=idx+1, counts=n_counts,shannon=entropy, delim= cli.delimiter).unwrap();
         }
     );
 }
 
-fn get_entropy(notation_count: &Vec<f64>, genome_count: &f64) -> f64 {
-    notation_count.iter().map(|&count| {
-            let p = count/genome_count;
-            -1.0*p*p.log(2.0)
+fn get_entropy(notation_count: &Vec<f64>) -> f64 {
+    let sum_considered_places: f64 = notation_count.iter().sum();
+    let entropy = notation_count.iter().map(|&count| {
+            let p = count/sum_considered_places;
+            if p != 0.0f64 {
+                -1.0*p*p.log(2.0)
+            } else {
+                0.0f64
+            }
         }
-    ).sum() // sum (-plogp) where p = N/sum
+    ).sum(); // sum (-plogp) where p = N/sum
+    entropy
 }
